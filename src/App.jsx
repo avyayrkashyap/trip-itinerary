@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import LoginPage from './pages/LoginPage'
@@ -9,7 +9,7 @@ import ProfilePage from './pages/ProfilePage'
 
 export default function App() {
   return (
-    <BrowserRouter basename={import.meta.env.PROD ? '/trip-itinerary' : '/'}>
+    <HashRouter>
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
