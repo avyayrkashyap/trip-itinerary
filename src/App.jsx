@@ -9,7 +9,7 @@ import ProfilePage from './pages/ProfilePage'
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/trip-itinerary">
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
