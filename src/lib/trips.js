@@ -132,36 +132,31 @@ export async function getUserStats(uid, email) {
 }
 
 export async function deleteAccount(user) {
-  const [ownedSnap, memberSnap] = await Promise.all([
-    getDocs(query(collection(db, 'trips'), where('ownerId', '==', user.uid))),
-    getDocs(query(collection(db, 'trips'), where('allowedUsers', 'array-contains', user.uid))),
-  ])
+  // Only query by allowedUsers — Firestore can verify this passes the read rule
+  const allSnap = await getDocs(
+    query(collection(db, 'trips'), where('allowedUsers', 'array-contains', user.uid))
+  )
+  const ownedDocs = allSnap.docs.filter(d => d.data().ownerId === user.uid)
+  const joinedDocs = allSnap.docs.filter(d => d.data().ownerId !== user.uid)
 
-  // Delete owned trips one at a time to isolate any failures
-  for (const tripDoc of ownedSnap.docs) {
+  // Delete owned trips (places + token + trip)
+  for (const tripDoc of ownedDocs) {
     const { shareToken } = tripDoc.data()
     const placesSnap = await getDocs(collection(db, 'trips', tripDoc.id, 'places'))
-
     const batch = writeBatch(db)
     placesSnap.docs.forEach(d => batch.delete(d.ref))
     batch.delete(tripDoc.ref)
     if (shareToken) batch.delete(doc(db, 'tripTokens', shareToken))
-    console.log('deleting trip', tripDoc.id, 'with', placesSnap.size, 'places')
     await batch.commit()
-    console.log('deleted trip', tripDoc.id)
   }
 
-  // Remove self from joined trips
-  const joinedTrips = memberSnap.docs.filter(d => d.data().ownerId !== user.uid)
-  for (const tripDoc of joinedTrips) {
-    console.log('leaving trip', tripDoc.id)
+  // Remove self from trips owned by others
+  for (const tripDoc of joinedDocs) {
     await updateDoc(tripDoc.ref, {
       allowedUsers: arrayRemove(user.uid),
       allowedEmails: arrayRemove(user.email),
     })
-    console.log('left trip', tripDoc.id)
   }
 
-  console.log('deleting auth user')
   await deleteUser(auth.currentUser)
 }
