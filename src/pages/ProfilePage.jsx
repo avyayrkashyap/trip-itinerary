@@ -35,10 +35,11 @@ export default function ProfilePage() {
       await deleteAccount(currentUser)
       navigate('/login')
     } catch (err) {
+      console.error('deleteAccount error:', err.code, err.message, err)
       if (err.code === 'auth/requires-recent-login') {
         setDeleteError('Please sign out and sign back in, then try again.')
       } else {
-        setDeleteError('Something went wrong. Try again.')
+        setDeleteError(err.message || 'Something went wrong. Try again.')
       }
       setDeleting(false)
     }
