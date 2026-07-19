@@ -137,24 +137,31 @@ export async function deleteAccount(user) {
     getDocs(query(collection(db, 'trips'), where('allowedUsers', 'array-contains', user.uid))),
   ])
 
-  const placesSnaps = await Promise.all(
-    ownedSnap.docs.map(d => getDocs(collection(db, 'trips', d.id, 'places')))
-  )
-
-  const batch = writeBatch(db)
-  ownedSnap.docs.forEach((tripDoc, i) => {
+  // Delete owned trips one at a time to isolate any failures
+  for (const tripDoc of ownedSnap.docs) {
     const { shareToken } = tripDoc.data()
-    placesSnaps[i].docs.forEach(d => batch.delete(d.ref))
+    const placesSnap = await getDocs(collection(db, 'trips', tripDoc.id, 'places'))
+
+    const batch = writeBatch(db)
+    placesSnap.docs.forEach(d => batch.delete(d.ref))
     batch.delete(tripDoc.ref)
     if (shareToken) batch.delete(doc(db, 'tripTokens', shareToken))
-  })
-  memberSnap.docs
-    .filter(d => d.data().ownerId !== user.uid)
-    .forEach(d => batch.update(d.ref, {
+    console.log('deleting trip', tripDoc.id, 'with', placesSnap.size, 'places')
+    await batch.commit()
+    console.log('deleted trip', tripDoc.id)
+  }
+
+  // Remove self from joined trips
+  const joinedTrips = memberSnap.docs.filter(d => d.data().ownerId !== user.uid)
+  for (const tripDoc of joinedTrips) {
+    console.log('leaving trip', tripDoc.id)
+    await updateDoc(tripDoc.ref, {
       allowedUsers: arrayRemove(user.uid),
       allowedEmails: arrayRemove(user.email),
-    }))
+    })
+    console.log('left trip', tripDoc.id)
+  }
 
-  await batch.commit()
+  console.log('deleting auth user')
   await deleteUser(auth.currentUser)
 }
