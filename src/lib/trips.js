@@ -118,7 +118,8 @@ export async function deleteTrip(tripId, shareToken) {
 }
 
 export function getShareLink(shareToken) {
-  return `${window.location.origin}/join/${shareToken}`
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '')
+  return `${window.location.origin}${base}/join/${shareToken}`
 }
 
 export async function getUserStats(uid, email) {

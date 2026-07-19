@@ -1,0 +1,12 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      // Redirect all GitHub Pages 404s back to the SPA with the path as a query param
+      var path = window.location.pathname + window.location.search + window.location.hash
+      window.location.replace(window.location.origin + '/?p=' + encodeURIComponent(path))
+    </script>
+  </head>
+  <body></body>
+</html>
