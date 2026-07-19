@@ -15,9 +15,9 @@ import {
   arrayRemove,
   serverTimestamp,
 } from 'firebase/firestore'
-import { deleteUser } from 'firebase/auth'
+import { deleteUser, reauthenticateWithPopup } from 'firebase/auth'
 import { nanoid } from 'nanoid'
-import { db, auth } from './firebase'
+import { db, auth, googleProvider } from './firebase'
 
 export async function createTrip(user, name, startDate = null, endDate = null) {
   const tripRef = doc(collection(db, 'trips'))
@@ -132,6 +132,9 @@ export async function getUserStats(uid) {
 }
 
 export async function deleteAccount(user) {
+  // Re-authenticate first so deleteUser doesn't fail with requires-recent-login
+  await reauthenticateWithPopup(auth.currentUser, googleProvider)
+
   // Only query by allowedUsers — Firestore can verify this passes the read rule
   const allSnap = await getDocs(
     query(collection(db, 'trips'), where('allowedUsers', 'array-contains', user.uid))
