@@ -7,5 +7,5 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
-  base: '/trip-itinerary/',
+  base: process.env.NODE_ENV === 'production' ? '/trip-itinerary/' : '/',
 })
