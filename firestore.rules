@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /tripTokens/{shareToken} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+                    && request.resource.data.keys().hasOnly(['tripId', 'createdAt']);
+      allow update: if false;
+      allow delete: if request.auth != null
+                    && request.auth.uid == get(/databases/$(database)/documents/trips/$(resource.data.tripId)).data.ownerId;
+    }
+
+    match /trips/{tripId} {
+      allow read: if request.auth != null
+                  && request.auth.uid in resource.data.allowedUsers;
+
+      allow create: if request.auth != null
+                    && request.auth.uid == request.resource.data.ownerId
+                    && request.auth.uid in request.resource.data.allowedUsers;
+
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.ownerId
+        ||
+        (
+          !(request.auth.uid in resource.data.allowedUsers)
+          && request.auth.uid in request.resource.data.allowedUsers
+          && request.resource.data.name       == resource.data.name
+          && request.resource.data.ownerId    == resource.data.ownerId
+          && request.resource.data.shareToken == resource.data.shareToken
+          && request.resource.data.createdAt  == resource.data.createdAt
+          && request.resource.data.allowedUsers.size() == resource.data.allowedUsers.size() + 1
+        )
+      );
+
+      allow delete: if request.auth != null
+                    && request.auth.uid == resource.data.ownerId;
+
+      match /places/{placeId} {
+        allow read, create: if request.auth != null
+                    && request.auth.uid in get(/databases/$(database)/documents/trips/$(tripId)).data.allowedUsers;
+        allow update: if request.auth != null
+                    && request.auth.uid in get(/databases/$(database)/documents/trips/$(tripId)).data.allowedUsers;
+        allow delete: if request.auth != null && (
+                      request.auth.uid == resource.data.addedBy ||
+                      request.auth.uid == get(/databases/$(database)/documents/trips/$(tripId)).data.ownerId
+                    );
+      }
+    }
+  }
+}
