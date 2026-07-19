@@ -22,6 +22,7 @@ service cloud.firestore {
       allow update: if request.auth != null && (
         request.auth.uid == resource.data.ownerId
         ||
+        // Join: adding yourself to a trip via share link
         (
           !(request.auth.uid in resource.data.allowedUsers)
           && request.auth.uid in request.resource.data.allowedUsers
@@ -30,6 +31,15 @@ service cloud.firestore {
           && request.resource.data.shareToken == resource.data.shareToken
           && request.resource.data.createdAt  == resource.data.createdAt
           && request.resource.data.allowedUsers.size() == resource.data.allowedUsers.size() + 1
+        )
+        ||
+        // Leave: removing yourself when deleting your account
+        (
+          request.auth.uid in resource.data.allowedUsers
+          && !(request.auth.uid in request.resource.data.allowedUsers)
+          && request.resource.data.ownerId    == resource.data.ownerId
+          && request.resource.data.shareToken == resource.data.shareToken
+          && request.resource.data.allowedUsers.size() == resource.data.allowedUsers.size() - 1
         )
       );
 
