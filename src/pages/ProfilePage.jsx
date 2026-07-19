@@ -13,7 +13,7 @@ export default function ProfilePage() {
   const [deleteError, setDeleteError] = useState('')
 
   useEffect(() => {
-    getUserStats(currentUser.uid, currentUser.email).then(setStats)
+    getUserStats(currentUser.uid).then(setStats)
   }, [currentUser.uid, currentUser.email])
 
   const displayName = currentUser.displayName || currentUser.email

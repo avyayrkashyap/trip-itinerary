@@ -122,7 +122,7 @@ export function getShareLink(shareToken) {
   return `${window.location.origin}${base}/#/join/${shareToken}`
 }
 
-export async function getUserStats(uid, email) {
+export async function getUserStats(uid) {
   const tripsSnap = await getDocs(
     query(collection(db, 'trips'), where('allowedUsers', 'array-contains', uid))
   )
