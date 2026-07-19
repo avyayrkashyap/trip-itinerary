@@ -3,9 +3,15 @@ import { resolveNameFromUrl } from '../lib/urlUtils'
 
 const MAPS_REGEX = /^https?:\/\/(www\.)?(google\.[a-z.]+\/maps|maps\.google\.[a-z.]+|goo\.gl\/maps|maps\.app\.goo\.gl)\//
 
+const TAGS = [
+  { value: 'food', label: 'Food & Drink' },
+  { value: 'place', label: 'Places to Visit' },
+]
+
 export default function AddPlaceForm({ onAdd }) {
   const [name, setName] = useState('')
   const [url, setUrl] = useState('')
+  const [tag, setTag] = useState(null)
   const [urlError, setUrlError] = useState('')
   const [resolving, setResolving] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -54,9 +60,10 @@ export default function AddPlaceForm({ onAdd }) {
     if (!url.trim() || urlError || resolving) return
     setSubmitting(true)
     try {
-      await onAdd(name.trim() || 'Place', url.trim())
+      await onAdd(name.trim() || 'Place', url.trim(), tag)
       setName('')
       setUrl('')
+      setTag(null)
       nameManuallyEdited.current = false
     } catch (err) {
       console.error(err)
@@ -103,6 +110,34 @@ export default function AddPlaceForm({ onAdd }) {
             {urlError}
           </p>
         )}
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <label style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.14em', color: '#546A87' }}>TAG</label>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {TAGS.map(t => (
+            <button
+              key={t.value}
+              type="button"
+              onClick={() => setTag(tag === t.value ? null : t.value)}
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '11px',
+                letterSpacing: '0.06em',
+                padding: '8px 14px',
+                borderRadius: '20px',
+                border: '1px solid',
+                borderColor: tag === t.value ? '#A09383' : '#243347',
+                background: tag === t.value ? '#A09383' : 'transparent',
+                color: tag === t.value ? '#182030' : '#546A87',
+                cursor: 'pointer',
+                transition: 'all 150ms ease',
+              }}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

@@ -15,19 +15,37 @@ export default function PlaceCard({ place, currentUid, onDelete }) {
       gap: '10px',
     }}>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: '14px',
-          fontWeight: 600,
-          color: '#F6F1E9',
-          letterSpacing: '-0.01em',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          marginBottom: '6px',
-        }}>
-          {place.name}
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+          <p style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '14px',
+            fontWeight: 600,
+            color: '#F6F1E9',
+            letterSpacing: '-0.01em',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            flex: 1,
+            minWidth: 0,
+          }}>
+            {place.name}
+          </p>
+          {place.tag && (
+            <span style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: '9px',
+              letterSpacing: '0.1em',
+              color: '#A09383',
+              border: '1px solid #A09383',
+              borderRadius: '20px',
+              padding: '2px 8px',
+              flexShrink: 0,
+              whiteSpace: 'nowrap',
+            }}>
+              {place.tag === 'food' ? 'FOOD & DRINK' : 'VISIT'}
+            </span>
+          )}
+        </div>
         <a
           href={place.mapsUrl}
           target="_blank"

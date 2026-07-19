@@ -76,10 +76,11 @@ export async function joinTripByToken(shareToken, user) {
   return tripId
 }
 
-export async function addPlace(tripId, user, name, mapsUrl) {
+export async function addPlace(tripId, user, name, mapsUrl, tag = null) {
   await addDoc(collection(db, 'trips', tripId, 'places'), {
     name,
     mapsUrl,
+    tag,
     addedBy: user.uid,
     addedByEmail: user.email,
     addedByName: user.displayName || user.email,

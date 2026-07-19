@@ -178,8 +178,8 @@ export default function TripPage() {
     return getPlaces(tripId, setPlaces)
   }, [trip, tripId])
 
-  async function handleAddPlace(name, mapsUrl) {
-    await addPlace(tripId, currentUser, name, mapsUrl)
+  async function handleAddPlace(name, mapsUrl, tag) {
+    await addPlace(tripId, currentUser, name, mapsUrl, tag)
     setShowAddForm(false)
   }
 
